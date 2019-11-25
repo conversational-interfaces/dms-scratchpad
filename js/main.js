@@ -5,8 +5,7 @@ let dmsEditor;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const CANVAS_SIZE = 1000
-canvas.width  = CANVAS_SIZE;
-canvas.height = CANVAS_SIZE; 
+
 
 let configureEditor = function(editor) {
     editor.setTheme("ace/theme/textmate");
@@ -47,10 +46,12 @@ let configureEditor = function(editor) {
 };
 
 document.addEventListener('DOMContentLoaded', (event) => {
-    resetCanvas();
     dmsEditor = ace.edit("editor");
     configureEditor(dmsEditor);
     dmsEditor.getSession().setValue(DEFAULT_DMS);
+    canvas.width  = CANVAS_SIZE;
+    canvas.height = CANVAS_SIZE; 
+    resetCanvas();
 });
 
 let resetCanvas = function() {
