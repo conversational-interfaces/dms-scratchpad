@@ -117,41 +117,36 @@ let start = function(dmpl, debug_mode) {
 
 const DEFAULT_DMS = `
 once {
+    // size of each agent (0.0 - 1.0)
     BLOCK_SIZE = 0.5
     
-    def draw(pos2d, color) {
-        pop {
-            object: "box",
-            action: "draw",
-            params: {
-                color: color,
-                pos2d: pos2d,
-                size: BLOCK_SIZE
-            }
-        }
-    }
-    
+    // we have two agents, one chases the other -
+    // notice their opposite distance preferences
     agents = [
         {
             pos2d: [1, 5],
             preferences: [
-                [{dist: 0}, {dist: 10}]
+                // prefer 0 over 10
+                [{distance: 0}, {distance: 10}]
             ],
             speed: 0.9,
-            color: "#aa3a3a60"
+            color: "#aa3a3a60"  // red
         },
         {
             pos2d: [5, 5],
             preferences: [
-               [{dist: 10}, {dist: 0}]
+                // prefer 10 over 0
+                [{distance: 10}, {distance: 0}]
             ],
-            speed: 1.0,
-            color: "#04aaaa60"
+            speed: 1,
+            color: "#04aaaa60"  // blue
         }
     ]
     
+    // represents the current agent
     agent_idx = 0
     
+    // helper function to compute absolute value
     def abs(x) {
         if x < 0 {
             pop -1 * x
@@ -161,39 +156,56 @@ once {
         }
     }
     
+    // helper function to compute distance between points
     def compute_dist(p1, p2) {
         pop abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
     }
 }
 
-agent = agents[agent_idx]
-pos2d = agent["pos2d"]
-speed = agent["speed"]
-x, y = pos2d
+// get current agent's position
+x, y = agents[agent_idx]["pos2d"]
 
-#{depth: 2, model: agent["preferences"]}
+// let the agent decide an optimal action
+#{depth: 1, model: agents[agent_idx]["preferences"]}
 fork {
-    x > BLOCK_SIZE {
-        x = x - BLOCK_SIZE * speed
+    x > BLOCK_SIZE * agents[agent_idx]["speed"] {
+        // walk left
+        x = x - BLOCK_SIZE * agents[agent_idx]["speed"]
     }
     x < 10 - BLOCK_SIZE {
-        x = x + BLOCK_SIZE * speed
+        // walk right
+        x = x + BLOCK_SIZE * agents[agent_idx]["speed"]
     }
-    y > BLOCK_SIZE {
-        y = y - BLOCK_SIZE * speed
+    y > BLOCK_SIZE * agents[agent_idx]["speed"] {
+        // walk up
+        y = y - BLOCK_SIZE * agents[agent_idx]["speed"]
     }
     y < 10 - BLOCK_SIZE {
-        y = y + BLOCK_SIZE * speed
+        // walk down
+        y = y + BLOCK_SIZE * agents[agent_idx]["speed"]
     }
 }
 
-dist = compute_dist(agents[0]["pos2d"], agents[1]["pos2d"])
+// render the agent on the canvas
+act {
+    object: "box",
+    action: "draw",
+    params: {
+        color: agents[agent_idx]["color"],
+        pos2d: [x, y],
+        size: BLOCK_SIZE
+    }
+}
 
-agent = edit(agent, pos2d, "prev_pos2d")
-pos2d = [x, y]
-act draw(pos2d, agent["color"])
-agent = edit(agent, pos2d, "pos2d")
-agents = edit(agents, agent, agent_idx)
+// update the agent positions
+agents = edit(agents, 
+    edit(agents[agent_idx], [x, y], "pos2d"), 
+    agent_idx)
+    
+// update the distance
+distance = compute_dist(agents[0]["pos2d"], agents[1]["pos2d"])
 
+// cycle through agents
 agent_idx = (agent_idx + 1) % len(agents)
+
 `;
