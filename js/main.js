@@ -1,11 +1,17 @@
 
 let worker = null;
 let dmsEditor;
-
+const CANVAS_SIZE = 1000
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const CANVAS_SIZE = 1000
 
+let resetCanvas = function() {
+    canvas.width  = CANVAS_SIZE;
+    canvas.height = CANVAS_SIZE; 
+    ctx.fillStyle = "wheat";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+resetCanvas();
 
 let configureEditor = function(editor) {
     editor.setTheme("ace/theme/textmate");
@@ -49,15 +55,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
     dmsEditor = ace.edit("editor");
     configureEditor(dmsEditor);
     dmsEditor.getSession().setValue(DEFAULT_DMS);
-    canvas.width  = CANVAS_SIZE;
-    canvas.height = CANVAS_SIZE; 
+    
+    
     resetCanvas();
 });
 
-let resetCanvas = function() {
-    ctx.fillStyle = "wheat";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
 
 let stop = function() {
     if (worker) { 
