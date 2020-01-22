@@ -124,7 +124,7 @@ let sendIntent = function(intent) {
             type: 'handle-event', 
             input: intent 
         });
-        messagesListDiv.innerHTML += '<pre>' + intent + '</pre>';
+        messagesListDiv.innerHTML += '<div class="user-intent"><pre>' + intent + '</pre></div>';
     }
 };
 

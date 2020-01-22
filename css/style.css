@@ -27,3 +27,10 @@
     overflow: auto;
     font-weight: 700;
 }
+
+.user-intent {
+    text-align: right;
+    background: #def8c1ad;
+    padding: 10px;
+	border-radius: 1em;
+}
