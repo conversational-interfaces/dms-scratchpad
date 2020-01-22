@@ -9,5 +9,21 @@
 
 #canvas {
     width: 100%;
-    height: 100%;
+    height: 90vh;
+}
+
+.hidden {
+    display: none;
+}
+
+#dmpl-output {
+    max-height: 90vh;
+    overflow: auto;
+    font-weight: 700;
+}
+
+#messages-list {
+    max-height: 90vh;
+    overflow: auto;
+    font-weight: 700;
 }

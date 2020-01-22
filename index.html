@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
     <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
     <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+    <link rel=stylesheet href=https://cdn.jsdelivr.net/npm/pretty-print-json@0.2/dist/pretty-print-json.css>
 </head>
 
 <body>
@@ -18,7 +19,26 @@
                 <div id="editor"></div>
             </div>
             <div class="column col-6">
+                <ul class="tab tab-block">
+                    <li id="canvas-tab-item" class="tab-item active">
+                        <a href="#" onclick="onCanvasClicked();">Canvas</a>
+                    </li>
+                    <li id="dmpl-tab-item" class="tab-item">
+                        <a href="#" onclick="onDMPLClicked();">DMPL</a>
+                    </li>
+                    <li id="messages-tab-item" class="tab-item">
+                        <a href="#" onclick="onMessagesClicked();">Messages</a>
+                    </li>
+                </ul>
                 <canvas id="canvas"></canvas>
+                <pre id="dmpl-output" class="hidden"></pre>
+                <div id="messages" class="hidden">
+                    <div class="has-icon-left">
+                        <input id="intent-input" type="text" class="form-input" placeholder="enter intent here">
+                        <i class="form-icon icon icon-arrow-right"></i>
+                    </div>
+                    <div id="messages-list"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -29,6 +49,7 @@
     <script src="js/dms-compiler.js"></script>
     <script src="js/ace/ace.js"></script>
     <script src="js/ace/ext-language_tools.js"></script>
+    <script src=https://cdn.jsdelivr.net/npm/pretty-print-json@0.2/dist/pretty-print-json.min.js></script>
     <script src="js/main.js"></script>
 </body>
 </html>

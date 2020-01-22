@@ -3,7 +3,22 @@ let worker = null;
 let dmsEditor;
 const CANVAS_SIZE = 1000
 const canvas = document.getElementById('canvas');
+const dmplOutputDiv = document.getElementById('dmpl-output');
+const messagesDiv = document.getElementById('messages');
+const messagesListDiv = document.getElementById('messages-list');
 const ctx = canvas.getContext('2d');
+const canvasTabItem = document.getElementById('canvas-tab-item');
+const dmplTabItem = document.getElementById('dmpl-tab-item');
+const messagesTabItem = document.getElementById('messages-tab-item');
+var input = document.getElementById('intent-input');
+
+input.addEventListener('keyup', function(event) {
+    if (event.keyCode === 13) {
+        event.preventDefault();
+        sendIntent(input.value);
+        input.value = '';
+    }
+});
 
 let resetCanvas = function() {
     canvas.width  = CANVAS_SIZE;
@@ -33,6 +48,7 @@ let configureEditor = function(editor) {
         try {
             let dmpl = Compiler(text);
             console.log(dmpl);
+            dmplOutputDiv.innerHTML = prettyPrintJson.toHtml(dmpl);
             start(dmpl, true);
         } catch (e) {
             dmpl = undefined;
@@ -60,14 +76,57 @@ document.addEventListener('DOMContentLoaded', (event) => {
     resetCanvas();
 });
 
+let onCanvasClicked = function(e) {
+    canvasTabItem.classList.add('active');
+    canvas.classList.remove("hidden");
+
+    dmplTabItem.classList.remove('active');
+    dmplOutputDiv.classList.add("hidden");
+
+    messagesTabItem.classList.remove('active');
+    messagesDiv.classList.add("hidden");
+};
+
+let onDMPLClicked = function(e) {
+    canvasTabItem.classList.remove('active');
+    canvas.classList.add("hidden");
+
+    dmplTabItem.classList.add('active');
+    dmplOutputDiv.classList.remove("hidden");
+
+    messagesTabItem.classList.remove('active');
+    messagesDiv.classList.add("hidden");
+}
+
+let onMessagesClicked = function(e) {
+    canvasTabItem.classList.remove('active');
+    canvas.classList.add("hidden");
+
+    dmplTabItem.classList.remove('active');
+    dmplOutputDiv.classList.add("hidden");
+
+    messagesTabItem.classList.add('active');
+    messagesDiv.classList.remove("hidden");
+}
 
 let stop = function() {
     if (worker) { 
         worker.terminate();
         worker = null;
         resetCanvas();
+        messagesListDiv.innerHTML = '';
     }
 }
+
+let sendIntent = function(intent) {
+    if (worker) {
+        worker.postMessage({
+            type: 'handle-event', 
+            input: intent 
+        });
+        messagesListDiv.innerHTML += '<pre>' + intent + '</pre>';
+    }
+};
 
 let start = function(dmpl, debug_mode) {
     if (debug_mode === undefined) {
@@ -81,15 +140,18 @@ let start = function(dmpl, debug_mode) {
             case 'print':
                 try {
                     let dataJson = JSON.parse(data.text);
+                    messagesListDiv.innerHTML += `<pre>${prettyPrintJson.toHtml(dataJson)}</pre>`;
+                    if (messagesListDiv.innerHTML.length > 10000) {
+                        messagesListDiv.innerHTML = messagesListDiv.innerHTML.substr(5000);
+                    }
+                    messagesListDiv.scrollTop = messagesListDiv.scrollHeight;
                     if (dataJson['@act'] !== undefined) {
-                        // console.log(JSON.stringify(dataJson['@act']));
                         let {object, action, params} = dataJson['@act'];
                         if (object === 'box' && action == 'draw') {
                             let {color, pos2d, size} = params;
                             size = size * 100;
                             ctx.fillStyle = color;
 
-                            // let size = CANVAS_SIZE / 100;
                             ctx.fillRect(
                                 parseFloat(pos2d[0]) * (CANVAS_SIZE / 10) - size/2, 
                                 parseFloat(pos2d[1]) * (CANVAS_SIZE / 10) - size/2, 
