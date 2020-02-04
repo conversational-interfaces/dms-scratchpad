@@ -1,0 +1,159 @@
+once {
+    alreadyAsked = false
+    clarifyFlavors = false
+    state = -1
+}
+
+#{depth: 3}
+fork {
+
+    state == -1 {  // "startup"
+        act "greeting.hello"
+        act "greeting.welcome"
+        state = 1
+    }
+    
+    state == 0 {
+        act "greeting.bye"
+        pop true
+    }
+    
+    state == 1 && !alreadyAsked {
+        act "question.what.user-wants"
+        alreadyAsked = true
+    }
+    
+    state == 1 && input("statement.cake") {
+        act "acknowledgement"
+        state  = 2
+    }
+    
+    state == 1 && input("statement.cake.sponge"){
+        act "acknowledgement"
+        type = "sponge"
+        state  = 2
+    }
+    
+    state == 1 && input("statement.cake.cheese"){
+        act "acknowledgement"
+        type = "cheese"
+        state  = 2
+    }
+    
+    state == 2 && !exists("confirmX") && !exists("sugar") {
+        act "question.cavities"
+        input -> result {
+            result == "answer.no" {
+                act "question.diabetic"
+                
+                input -> result {
+                    result == "answer.yes"  || result == "answer.dont-know" {
+                        confirmX = true
+                    }
+                    result == "answer.no"{
+                        confirmX = false
+                    }
+                }
+            }
+            result == "answer.yes" || result == "answer.dont-know"{
+                confirmX = true
+            }
+        }
+    }
+    
+    state == 2 && exists("confirmX") && !exists("sugar"){
+        if confirmX {
+            act "statement.cake.sugarless"
+            act "question.confirmation"
+            input -> result {
+                result == "answer.yes"{
+                    sugar = "x"
+                }
+            }
+        }
+        else {
+            sugar = "n"
+        }
+        confirmX = false
+    }
+    
+    state == 2 && !exists("type") && exists("sugar"){
+        act "question.cake.type"
+        input -> result{
+            result == "statement.cake.sponge"{
+                type = "sponge"                
+            }
+            result == "statement.cake.cheese"{
+                type = "cheese"
+            }
+        }
+    }
+    
+    state == 2 && type == "sponge" && exists("sugar"){
+        act "question.cake.flavor"
+        
+        input -> result{
+            result == "statement.flavor.chocolate"{
+                flavor = "chocolate"
+                state = 3
+            }
+            result == "statement.flavor.amaretto"{
+                flavor = "amaretto"
+                state = 3
+            }
+            result == "statement.flavor.lemon"{
+                act "apology.flavor"
+                clarifyFlavors = true
+            }
+        }
+    }
+    
+    state == 2 && type == "cheese" && exists("sugar"){
+        act "question.cake.flavor"
+        input -> result{
+            result == "statement.flavor.chocolate"{
+                flavor = "chocolate"
+                state = 3
+            }
+            result == "statement.flavor.lemon"{
+                flavor = "lemon"
+                state = 3
+            }
+            result == "statement.flavor.amaretto"{
+                act "apology.flavor"
+                clarifyFlavors = true
+            }
+        }
+    }
+    
+    clarifyFlavors || input("question.cake.flavor") {
+        if type == "sponge"{
+            act "answer.cake.flavor.sponge"
+        }
+        else if type == "cheese"{
+            act "answer.cake.flavor.cheese"
+        }
+        else if !exits(type){
+            act "answer.cake.flavor.sponge"
+            act "answer.cake.flavor.cheese"
+        }
+        clarifyFlavors = false
+    }
+    
+    state == 3 {
+        if type == "sponge" && flavor == "chocolate"{
+            act "statement.cake.ready.chocolate.sponge"
+        }
+        else if type == "cheese" && flavor == "chocolate"{
+            act "statement.cake.ready.chocolate.cheese"
+        } 
+        else if flavor == "lemon"{
+            act "statement.cake.ready.lemon"
+        } 
+        else if flavor == "amaretto"{
+            act "statement.cake.ready.amaretto"
+        }
+        state = 0
+    }
+    
+}
