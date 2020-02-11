@@ -237,6 +237,9 @@ const DEFAULT_DMS = `// Welcome to the scratchpad.
 // All code you write here automatically runs through an interpreter.
 // Check out the other demos by selecting from the dropdown above.
 
+// Here's the GitHub repo for this webapp:
+//         https://github.com/conversational-interfaces/dms-scratchpad
+
 once {
     // Code in a once-block only runs once
     is_user_greeted = false
