@@ -16,7 +16,7 @@
     <div class="container">
         <div class="columns">
             <div class="column col-6">
-                <div id="editor-top-area">
+                <div class="input-group" id="editor-top-area">
                     <span id="top-left-text">DM Script Scratchpad</span>
                     <div class="dropdown load-dropdown">
                         <a class="btn btn-link dropdown-toggle btn-lg" href="#" tabindex="0">
@@ -38,14 +38,61 @@
             </div>
             <div class="column col-6">
                 <ul class="tab tab-block">
-                    <li id="canvas-tab-item" class="tab-item active">
+                    <li id="canvas-tab-item" class="tab-item active popover popover-bottom">
                         <a href="#" onclick="onCanvasClicked();">Canvas</a>
+                        <div class="popover-container">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title h5">Canvas mode</div>
+                                </div>
+                                <div class="card-body">
+                                    Draw objects onto this 2D canvas by 
+                                    sending formatted <code>act</code> messages.
+                                    <br />
+                                    <br />
+                                    See the <i>snake chase</i> demo for an example.
+                                </div>
+                            </div>
+                        </div>
                     </li>
-                    <li id="dmpl-tab-item" class="tab-item">
+                    <li id="dmpl-tab-item" class="tab-item popover popover-bottom">
                         <a href="#" onclick="onDMPLClicked();">DMPL</a>
+                        <div class="popover-container">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title h5">DMPL mode</div>
+                                </div>
+                                <div class="card-body">
+                                    View generated DMPL JSON.
+                                    <br />
+                                    <br />
+                                    The <strong>dms-compiler</strong> converts DM Script into this JSON structure.
+                                </div>
+                                <div class="card-footer">
+                                    <div class="btn-group btn-group-block">
+                                        <button class="btn" onclick="window.open('https://www.w3.org/2019/04/dmpl/','_blank')">DMPL Specs</button>
+                                        <button class="btn" onclick="window.open('https://www.w3.org/2019/11/dms/','_blank')">DM Script Specs</button>
+                                        <button class="btn" onclick="window.open('https://github.com/conversational-interfaces/dms-compiler','_blank')">dms-compiler repo</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </li>
-                    <li id="messages-tab-item" class="tab-item">
+                    <li id="messages-tab-item" class="tab-item popover popover-bottom">
                         <a href="#" onclick="onMessagesClicked();">Messages</a>
+                        <div class="popover-container">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title h5">Messages mode</div>
+                                </div>
+                                <div class="card-body">
+                                    Send an intent to the system by typing into the input-field and hitting the enter-key. 
+                                    <br />
+                                    <br />
+                                    The system's output (<code>act</code> messages) are also shown here in blue.
+                                </div>
+                            </div>
+                        </div>
                     </li>
                 </ul>
                 <canvas id="canvas"></canvas>
@@ -60,7 +107,6 @@
             </div>
         </div>
     </div>
-    
     <script src='https://code.jquery.com/jquery-3.4.0.min.js',
         integrity='sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=',
         crossorigin='anonymous'></script>

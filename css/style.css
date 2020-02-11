@@ -44,6 +44,7 @@
     color: lightslategrey;
     margin-right: 10px;
     margin-left: 10px;
+    margin-top: 2px;
 }
 
 #top-left-text2 {
@@ -51,6 +52,7 @@
     color: lightslategrey;
     margin-right: 10px;
     margin-left: 10px;
+    margin-top: 8px;
 }
 
 .act-message {
