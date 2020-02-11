@@ -8,43 +8,45 @@ once {
 fork {
 
     state == -1 {  // "startup"
-        act "greeting.hello"
-        act "greeting.welcome"
+        act "Hello"
+        act "Welcome to my bakery!"
         state = 1
     }
     
     state == 0 {
-        act "greeting.bye"
+        act "Goodbye"
         pop true
     }
     
     state == 1 && !alreadyAsked {
-        act "question.what.user-wants"
+        act "What would you like to order?"
+        act "(hint: statement.cake)"
         alreadyAsked = true
     }
     
     state == 1 && input("statement.cake") {
-        act "acknowledgement"
+        act "Ok"
         state  = 2
     }
     
     state == 1 && input("statement.cake.sponge"){
-        act "acknowledgement"
+        act "Ok"
         type = "sponge"
         state  = 2
     }
     
     state == 1 && input("statement.cake.cheese"){
-        act "acknowledgement"
+        act "Ok"
         type = "cheese"
         state  = 2
     }
     
     state == 2 && !exists("confirmX") && !exists("sugar") {
-        act "question.cavities"
+        act "Do you have cavities?"
+        act "(hint: answer.no or answer.yes)"
         input -> result {
             result == "answer.no" {
-                act "question.diabetic"
+                act "Are you diabetic?"
                 
                 input -> result {
                     result == "answer.yes"  || result == "answer.dont-know" {
@@ -63,8 +65,8 @@ fork {
     
     state == 2 && exists("confirmX") && !exists("sugar"){
         if confirmX {
-            act "statement.cake.sugarless"
-            act "question.confirmation"
+            act "I'm guessing you want a sugarless cake."
+            act "Is that right?"
             input -> result {
                 result == "answer.yes"{
                     sugar = "x"
@@ -78,7 +80,8 @@ fork {
     }
     
     state == 2 && !exists("type") && exists("sugar"){
-        act "question.cake.type"
+        act "What type of cake would you like?"
+        act "(hint: statement.cake.sponge or statement.cake.cheese)"
         input -> result{
             result == "statement.cake.sponge"{
                 type = "sponge"                
@@ -90,9 +93,9 @@ fork {
     }
     
     state == 2 && type == "sponge" && exists("sugar"){
-        act "question.cake.flavor"
-        
-        input -> result{
+        act "What flavor of cake would you like?"
+        act "(hint: statement.flavor.chocolate)"
+        input -> result {
             result == "statement.flavor.chocolate"{
                 flavor = "chocolate"
                 state = 3
@@ -102,14 +105,14 @@ fork {
                 state = 3
             }
             result == "statement.flavor.lemon"{
-                act "apology.flavor"
+                act "I'm sorry, we're out of that flavor."
                 clarifyFlavors = true
             }
         }
     }
     
     state == 2 && type == "cheese" && exists("sugar"){
-        act "question.cake.flavor"
+        act "What flavor of cake would you like?"
         input -> result{
             result == "statement.flavor.chocolate"{
                 flavor = "chocolate"
@@ -120,7 +123,7 @@ fork {
                 state = 3
             }
             result == "statement.flavor.amaretto"{
-                act "apology.flavor"
+                act "I'm sorry, we're out of that flavor"
                 clarifyFlavors = true
             }
         }
@@ -142,16 +145,16 @@ fork {
     
     state == 3 {
         if type == "sponge" && flavor == "chocolate"{
-            act "statement.cake.ready.chocolate.sponge"
+            act "Your chocolate sponge cake is ready!"
         }
         else if type == "cheese" && flavor == "chocolate"{
-            act "statement.cake.ready.chocolate.cheese"
+            act "Your chocolate cheese cake is ready!"
         } 
         else if flavor == "lemon"{
-            act "statement.cake.ready.lemon"
+            act "Your lemon cake is ready!"
         } 
         else if flavor == "amaretto"{
-            act "statement.cake.ready.amaretto"
+            act "Your amaretto cake is ready!"
         }
         state = 0
     }

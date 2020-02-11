@@ -11,6 +11,8 @@ const canvasTabItem = document.getElementById('canvas-tab-item');
 const dmplTabItem = document.getElementById('dmpl-tab-item');
 const messagesTabItem = document.getElementById('messages-tab-item');
 var input = document.getElementById('intent-input');
+var demosDropdownMenu = document.getElementById('demos-dropdown-menu');
+var topLeftText2 = document.getElementById('top-left-text2');
 
 input.addEventListener('keyup', function(event) {
     if (event.keyCode === 13) {
@@ -70,11 +72,49 @@ let configureEditor = function(editor) {
 document.addEventListener('DOMContentLoaded', (event) => {
     dmsEditor = ace.edit("editor");
     configureEditor(dmsEditor);
-    dmsEditor.getSession().setValue(DEFAULT_DMS);
-    
-    
+    onClearClicked();
     resetCanvas();
+    updateDemosDropdown();
 });
+
+let onDemoItemClicked = function(name, filename, type, description) {
+    readTextFile(`/demos/${filename}`, dmsCode => {
+        dmsEditor.getSession().setValue(dmsCode);
+        topLeftText2.innerText = `${name}: ${description}`;
+        if (type == DMS_TYPE_2D) {
+            onCanvasClicked();
+        } else if (type == DMS_TYPE_CHAT) {
+            onMessagesClicked();
+        }
+    });
+};
+
+function readTextFile(file, callback) {
+    // https://stackoverflow.com/questions/14446447/how-to-read-a-local-text-file
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function () {
+        if (rawFile.readyState === 4) {
+            if (rawFile.status === 200 || rawFile.status == 0) {
+                var allText = rawFile.responseText;
+                callback(allText);
+            }
+        }
+    }
+    rawFile.send(null);
+}
+
+let updateDemosDropdown = function() {
+    DMS_EXAMPLES.forEach(({name, filename, type, description}) => {
+        demosDropdownMenu.innerHTML += `
+        <li class="menu-item">
+            <a href="#" onclick="return onDemoItemClicked('${name}', '${filename}', '${type}', '${description}')">
+                ${name}
+            </a>
+        </li>
+        `;
+    })
+};
 
 let onCanvasClicked = function(e) {
     canvasTabItem.classList.add('active');
@@ -140,12 +180,13 @@ let start = function(dmpl, debug_mode) {
             case 'print':
                 try {
                     let dataJson = JSON.parse(data.text);
-                    messagesListDiv.innerHTML += `<pre>${prettyPrintJson.toHtml(dataJson)}</pre>`;
-                    if (messagesListDiv.innerHTML.length > 10000) {
-                        messagesListDiv.innerHTML = messagesListDiv.innerHTML.substr(5000);
-                    }
-                    messagesListDiv.scrollTop = messagesListDiv.scrollHeight;
+                    let formattedMessage = `<pre>${prettyPrintJson.toHtml(dataJson)}</pre>`;
                     if (dataJson['@act'] !== undefined) {
+                        if (typeof dataJson['@act'] == 'string') {
+                            formattedMessage = `<pre class="act-message">${dataJson['@act']}</pre>`
+                        } else {
+                            formattedMessage = `<pre class="act-message">${prettyPrintJson.toHtml(dataJson['@act'])}</pre>`
+                        }
                         let {object, action, params} = dataJson['@act'];
                         if (object === 'box' && action == 'draw') {
                             let {color, pos2d, size} = params;
@@ -161,6 +202,12 @@ let start = function(dmpl, debug_mode) {
                     } else if (dataJson['@set'] !== undefined) {
                         // console.log(`${dataJson['@set']} = ${JSON.stringify(dataJson['val'])}`);
                     }
+
+                    messagesListDiv.innerHTML += formattedMessage;
+                    if (messagesListDiv.innerHTML.length > 10000) {
+                        messagesListDiv.innerHTML = messagesListDiv.innerHTML.substr(5000);
+                    }
+                    messagesListDiv.scrollTop = messagesListDiv.scrollHeight;
                 } catch (e) {
                     // console.log(data.text);
                 }
@@ -179,97 +226,41 @@ let start = function(dmpl, debug_mode) {
     });
 }
 
-const DEFAULT_DMS = `
+var onClearClicked = function() {
+    dmsEditor.getSession().setValue(DEFAULT_DMS);
+    topLeftText2.innerText = "";
+    onMessagesClicked();
+    return true;
+};
+
+const DEFAULT_DMS = `// Welcome to the scratchpad.
+// All code you write here automatically runs through an interpreter.
+// Check out the other demos by selecting from the dropdown above.
+
 once {
-    // size of each agent (0.0 - 1.0)
-    BLOCK_SIZE = 0.5
-    
-    // we have two agents, one chases the other -
-    // notice their opposite distance preferences
-    agents = [
-        {
-            pos2d: [1, 5],
-            preferences: [
-                // prefer 0 over 10
-                [{distance: 0}, {distance: 10}]
-            ],
-            speed: 0.9,
-            color: "#aa3a3a60"  // red
-        },
-        {
-            pos2d: [5, 5],
-            preferences: [
-                // prefer 10 over 0
-                [{distance: 10}, {distance: 0}]
-            ],
-            speed: 1,
-            color: "#04aaaa60"  // blue
-        }
-    ]
-    
-    // represents the current agent
-    agent_idx = 0
-    
-    // helper function to compute absolute value
-    def abs(x) {
-        if x < 0 {
-            pop -1 * x
-        }
-        else {
-            pop x
-        }
-    }
-    
-    // helper function to compute distance between points
-    def compute_dist(p1, p2) {
-        pop abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
-    }
+    // Code in a once-block only runs once
+    is_user_greeted = false
 }
 
-// get current agent's position
-x, y = agents[agent_idx]["pos2d"]
+// Everything else runs in a loop
 
-// let the agent decide an optimal action
-#{depth: 1, model: agents[agent_idx]["preferences"]}
-fork {
-    x > BLOCK_SIZE * agents[agent_idx]["speed"] {
-        // walk left
-        x = x - BLOCK_SIZE * agents[agent_idx]["speed"]
-    }
-    x < 10 - BLOCK_SIZE {
-        // walk right
-        x = x + BLOCK_SIZE * agents[agent_idx]["speed"]
-    }
-    y > BLOCK_SIZE * agents[agent_idx]["speed"] {
-        // walk up
-        y = y - BLOCK_SIZE * agents[agent_idx]["speed"]
-    }
-    y < 10 - BLOCK_SIZE {
-        // walk down
-        y = y + BLOCK_SIZE * agents[agent_idx]["speed"]
-    }
+if !is_user_greeted {
+    act "Hello"
+    is_user_greeted = true
+} else {
+    act "Hi again!"
 }
 
-// render the agent on the canvas
-act {
-    object: "box",
-    action: "draw",
-    params: {
-        color: agents[agent_idx]["color"],
-        pos2d: [x, y],
-        size: BLOCK_SIZE
+input -> intent {
+    intent == "hi" {
+        act "Nice to meet you"
+    }
+    intent == "bye" {
+        act "Goodbye!"
+        pop true
+    }
+    _ {
+        act "Interesting."
     }
 }
-
-// update the agent positions
-agents = edit(agents, 
-    edit(agents[agent_idx], [x, y], "pos2d"), 
-    agent_idx)
-    
-// update the distance
-distance = compute_dist(agents[0]["pos2d"], agents[1]["pos2d"])
-
-// cycle through agents
-agent_idx = (agent_idx + 1) % len(agents)
-
 `;

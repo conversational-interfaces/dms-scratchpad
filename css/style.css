@@ -1,6 +1,6 @@
 #editor {
     position: absolute;
-    top: 0px;
+    top: 50px;
     right: 0;
     bottom: 0;
     left: 0;
@@ -31,6 +31,30 @@
 .user-intent {
     text-align: right;
     background: #def8c1ad;
+    padding: 10px;
+	border-radius: 1em;
+}
+
+#editor-top-area {
+    margin-top: 6px;
+}
+
+#top-left-text {
+    font-size: 1.4em;
+    color: lightslategrey;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+#top-left-text2 {
+    font-size: 1.1em;
+    color: lightslategrey;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.act-message {
+    background: #c0f8ffad;
     padding: 10px;
 	border-radius: 1em;
 }
