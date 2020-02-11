@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 let onDemoItemClicked = function(name, filename, type, description) {
-    readTextFile(`/demos/${filename}`, dmsCode => {
+    readTextFile(`demos/${filename}`, dmsCode => {
         dmsEditor.getSession().setValue(dmsCode);
         topLeftText2.innerText = `${name}: ${description}`;
         if (type == DMS_TYPE_2D) {
